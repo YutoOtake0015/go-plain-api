@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"myapi/models"
@@ -17,25 +16,25 @@ func HelloHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
-	// 1. バイトスライス reqBodybuffer を何らかの形で用意
-	length, err := strconv.Atoi(req.Header.Get("Content-Length"))
-	if err != nil {
-		http.Error(w, "cannot get content length\n", http.StatusBadRequest)
-		return
-	}
-	reqBodybuffer := make([]byte, length)
-	// 2. Read メソッドでリクエストボディを読み出し
-	if _, err := req.Body.Read(reqBodybuffer); !errors.Is(err, io.EOF) {
-		http.Error(w, "fail to get request body\n", http.StatusBadRequest)
-		return
-	}
-	// 3. ボディを Close する
-	defer req.Body.Close()
+	// length, err := strconv.Atoi(req.Header.Get("Content-Length"))
+	// if err != nil {
+	// 	http.Error(w, "cannot get content length\n", http.StatusBadRequest)
+	// 	return
+	// }
+	// reqBodybuffer := make([]byte, length)
+	// if _, err := req.Body.Read(reqBodybuffer); !errors.Is(err, io.EOF) {
+	// 	http.Error(w, "fail to get request body\n", http.StatusBadRequest)
+	// 	return
+	// }
+	// defer req.Body.Close()
 	var reqArticle models.Article
-	if err := json.Unmarshal(reqBodybuffer, &reqArticle); err != nil {
+	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
-		return
 	}
+	// if err := json.Unmarshal(reqBodybuffer, &reqArticle); err != nil {
+	// 	http.Error(w, "fail to decode json\n", http.StatusBadRequest)
+	// 	return
+	// }
 	article := reqArticle
 	jsonData, err := json.Marshal(article)
 	if err != nil {
